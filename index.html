@@ -3,60 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nuestro Contador Realtime</title>
+    <title>Contador Sincronizado</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         body { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            margin: 0; 
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
+            display: flex; flex-direction: column; align-items: center; 
+            justify-content: center; height: 100vh; margin: 0; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212; color: white;
         }
-        #numero { 
-            font-size: 8rem; 
-            font-weight: bold; 
-            color: #1a73e8;
-        }
-        .controles {
-            display: flex;
-            gap: 20px;
-        }
+        h1 { margin-bottom: 10px; font-size: 1.5rem; color: #bbb; }
+        #numero { font-size: 10rem; font-weight: bold; margin: 20px 0; color: #00e676; }
+        .controles { display: flex; gap: 25px; }
         button { 
-            padding: 15px 30px; 
-            font-size: 1.5rem; 
-            border: none; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            color: white;
-            transition: opacity 0.2s;
+            padding: 20px 40px; font-size: 2rem; border: none; 
+            border-radius: 15px; cursor: pointer; color: white;
+            font-weight: bold; transition: transform 0.1s;
+            touch-action: manipulation; /* Optimizado para móviles */
         }
-        .btn-restar { background-color: #ea4335; }
-        .btn-sumar { background-color: #34a853; }
-        button:active { opacity: 0.7; }
+        .btn-restar { background-color: #ff5252; }
+        .btn-sumar { background-color: #00e676; }
+        button:active { transform: scale(0.9); opacity: 0.8; }
     </style>
 </head>
 <body>
 
-    <h1>Contador Grupal</h1>
-    <div id="numero">0</div>
+    <h1>CONTADOR GRUPAL</h1>
+    <div id="numero">...</div>
     
     <div class="controles">
-        <button class="btn-restar" onclick="cambiar(-1)">-1</button>
-        <button class="btn-sumar" onclick="cambiar(1)">+1</button>
+        <button class="btn-restar" onclick="cambiar(-1)">-</button>
+        <button class="btn-sumar" onclick="cambiar(1)">+</button>
     </div>
 
     <script>
-        // Por ahora esto es local, en el siguiente paso 
-        // lo conectaremos a Firebase para que se sincronice
-        let cuenta = 0;
+        // Configuración de tu Firebase
+        const firebaseConfig = {
+          apiKey: "AIzaSyD6yOf09wXPn1UBL9gMFRRFx56CumXA9cM",
+          authDomain: "contador-grupal.firebaseapp.com",
+          databaseURL: "https://contador-grupal-default-rtdb.firebaseio.com/",
+          projectId: "contador-grupal",
+          storageBucket: "contador-grupal.firebasestorage.app",
+          messagingSenderId: "270723570344",
+          appId: "1:270723570344:web:566dc7e3934185daf9009d"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const contadorRef = db.ref('valor_contador');
+
         const pantalla = document.getElementById("numero");
 
-        function cambiar(valor) {
-            cuenta += valor;
-            pantalla.innerText = cuenta;
+        // ESCUCHAR CAMBIOS EN TIEMPO REAL
+        contadorRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            pantalla.innerText = data !== null ? data : 0;
+        });
+
+        // FUNCION PARA CAMBIAR EL VALOR
+        function cambiar(delta) {
+            contadorRef.transaction((valorActual) => {
+                return (valorActual || 0) + delta;
+            });
         }
     </script>
 </body>
