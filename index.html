@@ -9,9 +9,10 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         :root {
+            /* Colores para el degradado y el efecto Glass */
             --bg-top: #3e2723;
             --bg-bottom: #795548;
-            --card: #1e293b;
+            --card-glass: rgba(30, 41, 59, 0.7);
             --text: #f8fafc;
             --sumar: #22c55e; --restar: #ef4444; --accent: #38bdf8;
             --avataroutline: #535059;
@@ -30,8 +31,8 @@
         }
 
         body { 
-            font-family: 'Quicksand', sans-serif; 
-            /* Fondo degradado que se queda fijo al hacer scroll */
+            font-family: Quicksand, sans-serif; 
+            /* 1. Cambio: Fondo degradado fijo */
             background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
             background-attachment: fixed;
             color: var(--text);
@@ -54,13 +55,18 @@
 
         .grid-principal {
             display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 500px;
-            margin-bottom: 120px; /* Recuperamos el espacio para los botones */
+            margin-bottom: 120px;
         }
 
         .tarjeta-usuario {
-            background: var(--card); padding: 15px 10px; border-radius: 15px;
-            text-align: center; border: 1px solid #334155;
+            /* 2. Cambio: Estética Glassmorphism */
+            background: var(--card-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 15px 10px; border-radius: 15px;
+            text-align: center; border: 1px solid rgba(255,255,255,0.1);
             display: flex; flex-direction: column; align-items: center;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
         }
         
         .avatar {
@@ -79,7 +85,7 @@
             padding: 5px; transition: transform 0.1s; touch-action: manipulation;
         }
         .btn-emoji:active { transform: scale(1.3); }
-        .valor { font-family: 'Quicksand', sans-serif; font-weight: bold; font-size: 1rem; }
+        .valor { font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.1rem; }
         
         .controles-inferiores {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
@@ -145,7 +151,6 @@
             { nombre: "jalapapeles", foto: "rata.jpg" }
         ];
 
-        // Orden solicitado: Poop -> Milk -> Shower
         const emojis = ["💩", "🥛", "🚿"]; 
         let modoSumar = true;
         let tiemposPoop = {};
