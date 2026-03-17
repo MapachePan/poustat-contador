@@ -1,14 +1,63 @@
-// Configuración de tu base de datos (te la da Firebase)
-const firebaseConfig = { ... };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuestro Contador Realtime</title>
+    <style>
+        body { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+        }
+        #numero { 
+            font-size: 8rem; 
+            font-weight: bold; 
+            color: #1a73e8;
+        }
+        .controles {
+            display: flex;
+            gap: 20px;
+        }
+        button { 
+            padding: 15px 30px; 
+            font-size: 1.5rem; 
+            border: none; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            color: white;
+            transition: opacity 0.2s;
+        }
+        .btn-restar { background-color: #ea4335; }
+        .btn-sumar { background-color: #34a853; }
+        button:active { opacity: 0.7; }
+    </style>
+</head>
+<body>
 
-// Escuchar cambios en tiempo real
-db.ref('contador').on('value', (snapshot) => {
-    document.getElementById('numero').innerText = snapshot.val();
-});
+    <h1>Contador Grupal</h1>
+    <div id="numero">0</div>
+    
+    <div class="controles">
+        <button class="btn-restar" onclick="cambiar(-1)">-1</button>
+        <button class="btn-sumar" onclick="cambiar(1)">+1</button>
+    </div>
 
-// Función para sumar
-function sumar() {
-    db.ref('contador').transaction(valorActual => (valorActual || 0) + 1);
-}
+    <script>
+        // Por ahora esto es local, en el siguiente paso 
+        // lo conectaremos a Firebase para que se sincronice
+        let cuenta = 0;
+        const pantalla = document.getElementById("numero");
+
+        function cambiar(valor) {
+            cuenta += valor;
+            pantalla.innerText = cuenta;
+        }
+    </script>
+</body>
+</html>
