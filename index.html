@@ -18,14 +18,13 @@
         }
 
         .nota-simple {
-            position: fixed;
-            top: 655px;
-            right: -65px;
-            transform: translateX(-50%);
+            /* He cambiado position a relative para que fluya con la imagen */
             font-family: "system-ui", "Comic Sans", cursive;
-            width: auto;
             font-size: 1.1rem;
             color: rgba(255,255,255,1);
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 120px; /* Espacio para que no lo tapen los botones */
             z-index: 1000;
         }
 
@@ -56,7 +55,7 @@
 
         .grid-principal {
             display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 500px;
-            margin-bottom: 120px;
+            margin-bottom: 20px; /* Reducido para que la imagen quede cerca */
         }
 
         .tarjeta-usuario {
@@ -105,12 +104,18 @@
             padding: 5px 15px; border-radius: 20px; font-size: 0.7rem;
             cursor: pointer; text-transform: uppercase;
         }
+
+        /* Estilo para la imagen de info del grupo */
+        .img-info-grupo {
+            width: 130px;
+            height: auto;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
 
     <div class="records-container">
-        <div class="nota-simple">dale a una caca y quitala 🎻🐐🔥</div>
         <div class="record-card">
             <span class="record-title">💩 Más Reciente</span>
             <span id="name-reciente" class="record-name">---</span>
@@ -124,6 +129,10 @@
     </div>
 
     <div id="contenedor" class="grid-principal"></div>
+
+    <img src="mmmna.png" alt="Info Grupo" class="img-info-grupo">
+
+    <div class="nota-simple">dale a una caca y quitala 🎻🐐🔥</div>
 
     <div class="controles-inferiores">
         <button id="btnModo" class="selector-modo modo-sumar" onclick="cambiarModo()">MODO: SUMAR (+)</button>
@@ -155,7 +164,6 @@
         let modoSumar = true;
         let tiemposPoop = {};
         
-        // Inicializar el audio
         const audioFart = new Audio('fartreverb.m4a');
 
         function cambiarModo() {
@@ -202,16 +210,14 @@
 
             if(emoji === "💩" && modoSumar) {
                 db.ref(`timestamps/${user}`).set(firebase.database.ServerValue.TIMESTAMP);
-                // Activamos el "trigger" de sonido en Firebase
                 db.ref('sound_trigger').set(firebase.database.ServerValue.TIMESTAMP);
             }
         }
 
-        // Escuchar cuando alguien activa el sonido
         db.ref('sound_trigger').on('value', (snapshot) => {
             if(snapshot.exists()) {
-                audioFart.currentTime = 0; // Reinicia el audio por si suena muy seguido
-                audioFart.play().catch(e => console.log("Audio bloqueado por el navegador hasta que interactúes con la página."));
+                audioFart.currentTime = 0;
+                audioFart.play().catch(e => console.log("Audio bloqueado."));
             }
         });
 
