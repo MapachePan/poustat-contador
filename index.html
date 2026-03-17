@@ -1,0 +1,14 @@
+// Configuración de tu base de datos (te la da Firebase)
+const firebaseConfig = { ... };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// Escuchar cambios en tiempo real
+db.ref('contador').on('value', (snapshot) => {
+    document.getElementById('numero').innerText = snapshot.val();
+});
+
+// Función para sumar
+function sumar() {
+    db.ref('contador').transaction(valorActual => (valorActual || 0) + 1);
+}
