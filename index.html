@@ -2,43 +2,61 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contador Sincronizado</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Estadísticas del Grupo</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
+            --sumar: #22c55e;
+            --restar: #ef4444;
+        }
         body { 
-            display: flex; flex-direction: column; align-items: center; 
-            justify-content: center; height: 100vh; margin: 0; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212; color: white;
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg); color: var(--text);
+            margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center;
         }
-        h1 { margin-bottom: 10px; font-size: 1.5rem; color: #bbb; }
-        #numero { font-size: 10rem; font-weight: bold; margin: 20px 0; color: #00e676; }
-        .controles { display: flex; gap: 25px; }
-        button { 
-            padding: 20px 40px; font-size: 2rem; border: none; 
-            border-radius: 15px; cursor: pointer; color: white;
-            font-weight: bold; transition: transform 0.1s;
-            touch-action: manipulation; /* Optimizado para móviles */
+        .grid-principal {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 500px;
+            margin-bottom: 80px;
         }
-        .btn-restar { background-color: #ff5252; }
-        .btn-sumar { background-color: #00e676; }
-        button:active { transform: scale(0.9); opacity: 0.8; }
+        .tarjeta-usuario {
+            background: var(--card); padding: 10px; border-radius: 15px;
+            text-align: center; border: 1px solid #334155;
+        }
+        .nombre { font-weight: bold; font-size: 0.9rem; margin-bottom: 8px; color: #94a3b8; text-transform: uppercase; }
+        .controles-emoji { display: flex; justify-content: space-around; align-items: center; }
+        .item-contador { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .btn-emoji {
+            background: none; border: none; font-size: 1.8rem; cursor: pointer;
+            padding: 5px; transition: transform 0.1s; touch-action: manipulation;
+        }
+        .btn-emoji:active { transform: scale(1.3); }
+        .valor { font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.1rem; }
+        
+        /* Botón de Modo Flotante */
+        .selector-modo {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            padding: 15px 40px; border-radius: 30px; border: none;
+            color: white; font-weight: bold; font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer;
+            transition: all 0.3s; z-index: 100;
+        }
+        .modo-sumar { background-color: var(--sumar); }
+        .modo-restar { background-color: var(--restar); box-shadow: 0 0 15px var(--restar); }
     </style>
 </head>
 <body>
 
-    <h1>CONTADOR GRUPAL</h1>
-    <div id="numero">...</div>
-    
-    <div class="controles">
-        <button class="btn-restar" onclick="cambiar(-1)">-</button>
-        <button class="btn-sumar" onclick="cambiar(1)">+</button>
-    </div>
+    <div class="grid-principal" id="contenedor">
+        </div>
+
+    <button id="btnModo" class="selector-modo modo-sumar" onclick="cambiarModo()">MODO: SUMAR (+)</button>
 
     <script>
-        // Configuración de tu Firebase
         const firebaseConfig = {
           apiKey: "AIzaSyD6yOf09wXPn1UBL9gMFRRFx56CumXA9cM",
           authDomain: "contador-grupal.firebaseapp.com",
@@ -49,25 +67,64 @@
           appId: "1:270723570344:web:566dc7e3934185daf9009d"
         };
 
-        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const contadorRef = db.ref('valor_contador');
+        
+        const usuarios = ["MapachePan", "I_Drive", "TripleJMC", "jalapapenes"];
+        const emojis = ["💩", "🚿", "🥛"];
+        let modoSumar = true;
 
-        const pantalla = document.getElementById("numero");
+        function cambiarModo() {
+            modoSumar = !modoSumar;
+            const btn = document.getElementById("btnModo");
+            btn.innerText = modoSumar ? "MODO: SUMAR (+)" : "MODO: RESTAR (-)";
+            btn.className = modoSumar ? "selector-modo modo-sumar" : "selector-modo modo-restar";
+        }
 
-        // ESCUCHAR CAMBIOS EN TIEMPO REAL
-        contadorRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            pantalla.innerText = data !== null ? data : 0;
-        });
+        function crearInterfaz() {
+            const contenedor = document.getElementById("contenedor");
+            usuarios.forEach(user => {
+                let html = `
+                <div class="tarjeta-usuario">
+                    <div class="nombre">${user}</div>
+                    <div class="controles-emoji">`;
+                
+                emojis.forEach(emoji => {
+                    const idSafe = `${user}_${emoji}`;
+                    html += `
+                        <div class="item-contador">
+                            <button class="btn-emoji" onclick="actualizar('${user}', '${emoji}')">${emoji}</button>
+                            <div class="valor" id="${idSafe}">0</div>
+                        </div>`;
+                });
 
-        // FUNCION PARA CAMBIAR EL VALOR
-        function cambiar(delta) {
-            contadorRef.transaction((valorActual) => {
-                return (valorActual || 0) + delta;
+                html += `</div></div>`;
+                contenedor.innerHTML += html;
             });
         }
+
+        function actualizar(user, emoji) {
+            const delta = modoSumar ? 1 : -1;
+            db.ref(`estadisticas/${user}/${emoji}`).transaction(current => {
+                let nuevo = (current || 0) + delta;
+                return nuevo < 0 ? 0 : nuevo; // No permite números negativos
+            });
+        }
+
+        // Escuchar datos de Firebase
+        db.ref('estadisticas').on('value', (snapshot) => {
+            const data = snapshot.val() || {};
+            usuarios.forEach(user => {
+                emojis.forEach(emoji => {
+                    const idSafe = `${user}_${emoji}`;
+                    const valor = (data[user] && data[user][emoji]) ? data[user][emoji] : 0;
+                    const el = document.getElementById(idSafe);
+                    if(el) el.innerText = valor;
+                });
+            });
+        });
+
+        crearInterfaz();
     </script>
 </body>
 </html>
