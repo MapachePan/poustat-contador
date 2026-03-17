@@ -3,22 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Estadísticas del Grupo</title>
+    <title>Estadísticas Pro - El Grupo</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --text: #f8fafc;
-            --sumar: #22c55e;
-            --restar: #ef4444;
+            --bg: #0f172a; --card: #1e293b; --text: #f8fafc;
+            --sumar: #22c55e; --restar: #ef4444; --accent: #38bdf8;
         }
         body { 
-            font-family: system-ui, -apple-system, sans-serif;
-            background-color: var(--bg); color: var(--text);
+            font-family: system-ui, sans-serif; background-color: var(--bg); color: var(--text);
             margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center;
         }
+        
+        /* Sección de Récords */
+        .records-container {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            width: 100%; max-width: 500px; margin-bottom: 20px;
+        }
+        .record-card {
+            background: #0ea5e922; border: 1px solid var(--accent);
+            padding: 10px; border-radius: 12px; text-align: center;
+        }
+        .record-title { font-size: 0.7rem; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
+        .record-name { font-weight: bold; font-size: 1rem; display: block; }
+        .record-time { font-size: 0.75rem; color: #94a3b8; }
+
         .grid-principal {
             display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 500px;
             margin-bottom: 80px;
@@ -27,7 +37,7 @@
             background: var(--card); padding: 10px; border-radius: 15px;
             text-align: center; border: 1px solid #334155;
         }
-        .nombre { font-weight: bold; font-size: 0.9rem; margin-bottom: 8px; color: #94a3b8; text-transform: uppercase; }
+        .nombre { font-weight: bold; font-size: 0.8rem; margin-bottom: 8px; color: #94a3b8; text-transform: uppercase; }
         .controles-emoji { display: flex; justify-content: space-around; align-items: center; }
         .item-contador { display: flex; flex-direction: column; align-items: center; gap: 2px; }
         .btn-emoji {
@@ -35,24 +45,33 @@
             padding: 5px; transition: transform 0.1s; touch-action: manipulation;
         }
         .btn-emoji:active { transform: scale(1.3); }
-        .valor { font-family: 'Courier New', monospace; font-weight: bold; font-size: 1.1rem; }
+        .valor { font-family: monospace; font-weight: bold; font-size: 1.1rem; }
         
-        /* Botón de Modo Flotante */
         .selector-modo {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             padding: 15px 40px; border-radius: 30px; border: none;
-            color: white; font-weight: bold; font-size: 1.1rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: pointer;
-            transition: all 0.3s; z-index: 100;
+            color: white; font-weight: bold; font-size: 1rem; z-index: 100;
         }
         .modo-sumar { background-color: var(--sumar); }
-        .modo-restar { background-color: var(--restar); box-shadow: 0 0 15px var(--restar); }
+        .modo-restar { background-color: var(--restar); }
     </style>
 </head>
 <body>
 
-    <div class="grid-principal" id="contenedor">
+    <div class="records-container">
+        <div class="record-card">
+            <span class="record-title">💩 Más Reciente</span>
+            <span id="name-reciente" class="record-name">---</span>
+            <span id="time-reciente" class="record-time">Hace 0s</span>
         </div>
+        <div class="record-card" style="border-color: #fb923c; background: #fb923c11;">
+            <span class="record-title" style="color: #fb923c;">💩 Más Estreñido</span>
+            <span id="name-antiguo" class="record-name">---</span>
+            <span id="time-antiguo" class="record-time">Hace 0s</span>
+        </div>
+    </div>
+
+    <div class="grid-principal" id="contenedor"></div>
 
     <button id="btnModo" class="selector-modo modo-sumar" onclick="cambiarModo()">MODO: SUMAR (+)</button>
 
@@ -73,6 +92,7 @@
         const usuarios = ["MapachePan", "I_Drive", "TripleJMC", "jalapapenes"];
         const emojis = ["💩", "🚿", "🥛"];
         let modoSumar = true;
+        let tiemposPoop = {};
 
         function cambiarModo() {
             modoSumar = !modoSumar;
@@ -84,20 +104,14 @@
         function crearInterfaz() {
             const contenedor = document.getElementById("contenedor");
             usuarios.forEach(user => {
-                let html = `
-                <div class="tarjeta-usuario">
-                    <div class="nombre">${user}</div>
-                    <div class="controles-emoji">`;
-                
+                let html = `<div class="tarjeta-usuario"><div class="nombre">${user}</div><div class="controles-emoji">`;
                 emojis.forEach(emoji => {
                     const idSafe = `${user}_${emoji}`;
-                    html += `
-                        <div class="item-contador">
-                            <button class="btn-emoji" onclick="actualizar('${user}', '${emoji}')">${emoji}</button>
-                            <div class="valor" id="${idSafe}">0</div>
-                        </div>`;
+                    html += `<div class="item-contador">
+                        <button class="btn-emoji" onclick="actualizar('${user}', '${emoji}')">${emoji}</button>
+                        <div class="valor" id="${idSafe}">0</div>
+                    </div>`;
                 });
-
                 html += `</div></div>`;
                 contenedor.innerHTML += html;
             });
@@ -105,26 +119,42 @@
 
         function actualizar(user, emoji) {
             const delta = modoSumar ? 1 : -1;
-            db.ref(`estadisticas/${user}/${emoji}`).transaction(current => {
+            const ref = db.ref(`estadisticas/${user}/${emoji}`);
+            ref.transaction(current => {
                 let nuevo = (current || 0) + delta;
-                return nuevo < 0 ? 0 : nuevo; // No permite números negativos
+                return nuevo < 0 ? 0 : nuevo;
             });
+            
+            // Si es un 💩 y estamos sumando, guardar la hora
+            if(emoji === "💩" && modoSumar) {
+                db.ref(`timestamps/${user}`).set(firebase.database.ServerValue.TIMESTAMP);
+            }
         }
 
-        // Escuchar datos de Firebase
-        db.ref('estadisticas').on('value', (snapshot) => {
-            const data = snapshot.val() || {};
-            usuarios.forEach(user => {
-                emojis.forEach(emoji => {
-                    const idSafe = `${user}_${emoji}`;
-                    const valor = (data[user] && data[user][emoji]) ? data[user][emoji] : 0;
-                    const el = document.getElementById(idSafe);
-                    if(el) el.innerText = valor;
-                });
-            });
-        });
+        function formatTime(ms) {
+            if (ms < 0) return "Hace 0s";
+            let sec = Math.floor(ms / 1000);
+            let hrs = Math.floor(sec / 3600);
+            sec %= 3600;
+            let mins = Math.floor(sec / 60);
+            sec %= 60;
+            return `Hace ${hrs}h ${mins}m ${sec}s`;
+        }
 
-        crearInterfaz();
-    </script>
-</body>
-</html>
+        function actualizarCronometros() {
+            const ahora = Date.now();
+            let entries = Object.entries(tiemposPoop).filter(e => e[1] > 0);
+            
+            if(entries.length > 0) {
+                // Ordenar por tiempo (el más grande es el más antiguo)
+                entries.sort((a, b) => b[1] - a[1]);
+                
+                const masAntiguo = entries[0];
+                const masReciente = entries[entries.length - 1];
+
+                document.getElementById('name-antiguo').innerText = masAntiguo[0];
+                document.getElementById('time-antiguo').innerText = formatTime(ahora - masAntiguo[1]);
+
+                document.getElementById('name-reciente').innerText = masReciente[0];
+                document.getElementById('time-reciente
+        
