@@ -156,5 +156,26 @@
                 document.getElementById('time-antiguo').innerText = formatTime(ahora - masAntiguo[1]);
 
                 document.getElementById('name-reciente').innerText = masReciente[0];
-                document.getElementById('time-reciente
-        
+                document.getElementById('time-reciente').innerText = formatTime(ahora - masReciente[1]);
+            }
+        }
+
+        db.ref('estadisticas').on('value', (snapshot) => {
+            const data = snapshot.val() || {};
+            usuarios.forEach(user => {
+                emojis.forEach(emoji => {
+                    const val = (data[user] && data[user][emoji]) ? data[user][emoji] : 0;
+                    document.getElementById(`${user}_${emoji}`).innerText = val;
+                });
+            });
+        });
+
+        db.ref('timestamps').on('value', (snapshot) => {
+            tiemposPoop = snapshot.val() || {};
+        });
+
+        setInterval(actualizarCronometros, 1000);
+        crearInterfaz();
+    </script>
+</body>
+</html>
