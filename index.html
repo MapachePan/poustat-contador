@@ -18,22 +18,30 @@
         }
 
         .nota-simple {
-            /* He cambiado position a relative para que fluya con la imagen */
+            /* Vuelve a ser independiente: muévela con top y right a tu gusto */
+            position: fixed; 
+            top: 655px;
+            right: -65px;
+            transform: translateX(-50%);
             font-family: "system-ui", "Comic Sans", cursive;
+            width: auto;
             font-size: 1.1rem;
             color: rgba(255,255,255,1);
-            text-align: center;
-            margin-top: 10px;
-            margin-bottom: 120px; /* Espacio para que no lo tapen los botones */
             z-index: 1000;
         }
 
         body { 
             font-family: 'Quicksand', sans-serif; 
+            /* Ajuste para evitar el fondo blanco al hacer scroll */
             background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
             background-attachment: fixed;
+            min-height: 100dvh; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center;
             color: var(--text);
-            margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center;
+            margin: 0; 
+            padding: 10px;
         }
 
         .records-container {
@@ -55,7 +63,7 @@
 
         .grid-principal {
             display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 500px;
-            margin-bottom: 20px; /* Reducido para que la imagen quede cerca */
+            margin-bottom: 20px;
         }
 
         .tarjeta-usuario {
@@ -105,11 +113,10 @@
             cursor: pointer; text-transform: uppercase;
         }
 
-        /* Estilo para la imagen de info del grupo */
         .img-info-grupo {
             width: 130px;
             height: auto;
-            margin: 10px 0;
+            margin: 10px 0 150px 0; /* Margen abajo grande para poder scrollear y ver la imagen */
         }
     </style>
 </head>
