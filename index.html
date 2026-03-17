@@ -14,15 +14,15 @@
             --sumar: #22c55e; --restar: #ef4444; --accent: #38bdf8;
         }
         .nota-simple {
-    width: 100%;
-    max-width: 500px;
-    text-align: center;
-    padding: 20px 0;
-    font-size: 0.9rem;
-    color: #94a3b8; /* Un color grisáceo suave para que parezca una nota */
-    font-weight: 500;
-    /* Sin bordes, sin fondo, solo el texto */
-        }
+    position: fixed; /* Esto la deja fija */
+    top: 10px;       /* Distancia desde arriba */
+    right: 10px;     /* Distancia desde la derecha */
+    width: auto;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.3); /* Color semi-transparente */
+    z-index: 1000;
+}
+
         body { 
             font-family: Quicksand, sans-serif; background-color: var(--bg); color: var(--text);
             margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center;
@@ -89,6 +89,7 @@
 <body>
 
     <div class="records-container">
+        <div class="nota-simple">bro los puse anchos, épico</div>
         <div class="record-card">
             <span class="record-title">💩 Más Reciente</span>
             <span id="name-reciente" class="record-name">---</span>
