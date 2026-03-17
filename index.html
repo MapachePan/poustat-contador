@@ -85,8 +85,6 @@
             padding: 5px; transition: transform 0.1s; touch-action: manipulation;
         }
         .btn-emoji:active { transform: scale(1.3); }
-        
-        /* FUENTE CORREGIDA AQUÍ */
         .valor { font-family: 'Quicksand', sans-serif; font-weight: bold; font-size: 1.1rem; }
         
         .controles-inferiores {
@@ -156,6 +154,9 @@
         const emojis = ["💩", "🥛", "🚿"]; 
         let modoSumar = true;
         let tiemposPoop = {};
+        
+        // Inicializar el audio
+        const audioFart = new Audio('fartreverb.m4a');
 
         function cambiarModo() {
             modoSumar = !modoSumar;
@@ -198,10 +199,21 @@
                 let nuevo = (current || 0) + delta;
                 return nuevo < 0 ? 0 : nuevo;
             });
+
             if(emoji === "💩" && modoSumar) {
                 db.ref(`timestamps/${user}`).set(firebase.database.ServerValue.TIMESTAMP);
+                // Activamos el "trigger" de sonido en Firebase
+                db.ref('sound_trigger').set(firebase.database.ServerValue.TIMESTAMP);
             }
         }
+
+        // Escuchar cuando alguien activa el sonido
+        db.ref('sound_trigger').on('value', (snapshot) => {
+            if(snapshot.exists()) {
+                audioFart.currentTime = 0; // Reinicia el audio por si suena muy seguido
+                audioFart.play().catch(e => console.log("Audio bloqueado por el navegador hasta que interactúes con la página."));
+            }
+        });
 
         function formatTime(ms) {
             let sec = Math.floor(ms / 1000);
