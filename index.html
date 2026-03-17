@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Estadísticas Pro - Control Total</title>
+    <title>Estadísticas Pro - Amucksitos</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
@@ -26,25 +26,36 @@
         .record-title { font-size: 0.7rem; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
         .record-name { font-weight: bold; font-size: 1rem; display: block; }
         .record-time { font-size: 0.75rem; color: #94a3b8; }
+
         .grid-principal {
             display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 500px;
             margin-bottom: 120px;
         }
         .tarjeta-usuario {
-            background: var(--card); padding: 10px; border-radius: 15px;
+            background: var(--card); padding: 15px 10px; border-radius: 15px;
             text-align: center; border: 1px solid #334155;
+            display: flex; flex-direction: column; align-items: center;
         }
-        .nombre { font-weight: bold; font-size: 0.8rem; margin-bottom: 8px; color: #94a3b8; text-transform: uppercase; }
-        .controles-emoji { display: flex; justify-content: space-around; align-items: center; }
-        .item-contador { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        
+        /* Estilo de la Foto de Perfil mejorado */
+        .avatar {
+            width: 60px; height: 60px; border-radius: 50%;
+            background-color: #334155; margin-bottom: 8px;
+            border: 2px solid var(--accent);
+            object-fit: cover; /* Esto evita que la imagen de la rata se estire feo */
+            object-position: center;
+        }
+
+        .nombre { font-weight: bold; font-size: 0.75rem; margin-bottom: 10px; color: #94a3b8; text-transform: uppercase; }
+        .controles-emoji { display: flex; justify-content: space-around; width: 100%; }
+        .item-contador { display: flex; flex-direction: column; align-items: center; }
         .btn-emoji {
-            background: none; border: none; font-size: 1.8rem; cursor: pointer;
+            background: none; border: none; font-size: 1.6rem; cursor: pointer;
             padding: 5px; transition: transform 0.1s; touch-action: manipulation;
         }
         .btn-emoji:active { transform: scale(1.3); }
-        .valor { font-family: monospace; font-weight: bold; font-size: 1.1rem; }
+        .valor { font-family: monospace; font-weight: bold; font-size: 1rem; }
         
-        /* Controles Inferiores */
         .controles-inferiores {
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             display: flex; flex-direction: column; align-items: center; gap: 10px; z-index: 100;
@@ -52,14 +63,14 @@
         .selector-modo {
             padding: 15px 40px; border-radius: 30px; border: none;
             color: white; font-weight: bold; font-size: 1rem; cursor: pointer; width: 220px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }
         .modo-sumar { background-color: var(--sumar); }
         .modo-restar { background-color: var(--restar); }
-        
         .btn-reset {
             background: none; border: 1px solid #475569; color: #94a3b8;
             padding: 5px 15px; border-radius: 20px; font-size: 0.7rem;
-            cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+            cursor: pointer; text-transform: uppercase;
         }
     </style>
 </head>
@@ -69,12 +80,12 @@
         <div class="record-card">
             <span class="record-title">💩 Más Reciente</span>
             <span id="name-reciente" class="record-name">---</span>
-            <span id="time-reciente" class="record-time">Esperando datos...</span>
+            <span id="time-reciente" class="record-time">Esperando...</span>
         </div>
         <div class="record-card" style="border-color: #fb923c; background: #fb923c11;">
             <span class="record-title" style="color: #fb923c;">💩 Más Estreñido</span>
             <span id="name-antiguo" class="record-name">---</span>
-            <span id="time-antiguo" class="record-time">Esperando datos...</span>
+            <span id="time-antiguo" class="record-time">Esperando...</span>
         </div>
     </div>
 
@@ -99,7 +110,14 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         
-        const usuarios = ["MapachePan", "I_Drive", "TripleJMC", "jalapapenes"];
+        // --- CONFIGURACIÓN DE INTEGRANTES ---
+        const configUsuarios = [
+            { nombre: "MapachePan", foto: "https://github.com/mapachepan.png" },
+            { nombre: "I_Drive", foto: "https://api.dicebear.com/7.x/avataaars/svg?seed=Idrive" },
+            { nombre: "TripleJMC", foto: "https://api.dicebear.com/7.x/avataaars/svg?seed=Triple" },
+            { nombre: "jalapapenes", foto: "rata.jpg" } // <--- USANDO TU ARCHIVO
+        ];
+
         const emojis = ["💩", "🚿", "🥛"];
         let modoSumar = true;
         let tiemposPoop = {};
@@ -111,29 +129,28 @@
             btn.className = modoSumar ? "selector-modo modo-sumar" : "selector-modo modo-restar";
         }
 
-        // --- NUEVA FUNCIÓN DE REINICIO ---
         function reiniciarTodo() {
-            const confirmar = confirm("¿Estás SEGURO de que quieres borrar todos los datos? Esto pondrá a cero los contadores de todos y reiniciará los tiempos.");
-            
-            if (confirmar) {
-                // Borrar estadísticas
-                db.ref('estadisticas').remove();
-                // Borrar tiempos
-                db.ref('timestamps').remove();
-                alert("Datos reiniciados correctamente.");
-                location.reload(); // Recarga la página para limpiar la interfaz
+            if (confirm("¿Seguro que quieres borrar todas las estadísticas?")) {
+                db.ref('/').remove();
+                location.reload();
             }
         }
 
         function crearInterfaz() {
             const contenedor = document.getElementById("contenedor");
-            usuarios.forEach(user => {
-                let html = `<div class="tarjeta-usuario"><div class="nombre">${user}</div><div class="controles-emoji">`;
+            configUsuarios.forEach(user => {
+                let html = `
+                <div class="tarjeta-usuario">
+                    <img src="${user.foto}" class="avatar" alt="${user.nombre}">
+                    <div class="nombre">${user.nombre}</div>
+                    <div class="controles-emoji">`;
+                
                 emojis.forEach(emoji => {
-                    html += `<div class="item-contador">
-                        <button class="btn-emoji" onclick="actualizar('${user}', '${emoji}')">${emoji}</button>
-                        <div class="valor" id="${user}_${emoji}">0</div>
-                    </div>`;
+                    html += `
+                        <div class="item-contador">
+                            <button class="btn-emoji" onclick="actualizar('${user.nombre}', '${emoji}')">${emoji}</button>
+                            <div class="valor" id="${user.nombre}_${emoji}">0</div>
+                        </div>`;
                 });
                 html += `</div></div>`;
                 contenedor.innerHTML += html;
@@ -146,7 +163,6 @@
                 let nuevo = (current || 0) + delta;
                 return nuevo < 0 ? 0 : nuevo;
             });
-            
             if(emoji === "💩" && modoSumar) {
                 db.ref(`timestamps/${user}`).set(firebase.database.ServerValue.TIMESTAMP);
             }
@@ -164,32 +180,23 @@
         function actualizarCronometros() {
             const ahora = Date.now();
             let entries = Object.entries(tiemposPoop);
-            
             if(entries.length > 0) {
                 entries.sort((a, b) => a[1] - b[1]); 
-                const masEstreñido = entries[0];
-                const masReciente = entries[entries.length - 1];
-
-                document.getElementById('name-antiguo').innerText = masEstreñido[0];
-                document.getElementById('time-antiguo').innerText = formatTime(ahora - masEstreñido[1]);
-
-                document.getElementById('name-reciente').innerText = masReciente[0];
-                document.getElementById('time-reciente').innerText = formatTime(ahora - masReciente[1]);
-            } else {
-                document.getElementById('name-antiguo').innerText = "---";
-                document.getElementById('time-antiguo').innerText = "Esperando datos...";
-                document.getElementById('name-reciente').innerText = "---";
-                document.getElementById('time-reciente').innerText = "Esperando datos...";
+                const masEstre = entries[0];
+                const masReci = entries[entries.length - 1];
+                document.getElementById('name-antiguo').innerText = masEstre[0];
+                document.getElementById('time-antiguo').innerText = formatTime(ahora - masEstre[1]);
+                document.getElementById('name-reciente').innerText = masReci[0];
+                document.getElementById('time-reciente').innerText = formatTime(ahora - masReci[1]);
             }
         }
 
         db.ref('estadisticas').on('value', (snapshot) => {
             const data = snapshot.val() || {};
-            usuarios.forEach(user => {
-                emojis.forEach(emoji => {
-                    const val = (data[user] && data[user][emoji]) ? data[user][emoji] : 0;
-                    const el = document.getElementById(`${user}_${emoji}`);
-                    if(el) el.innerText = val;
+            configUsuarios.forEach(u => {
+                emojis.forEach(e => {
+                    const el = document.getElementById(`${u.nombre}_${e}`);
+                    if(el) el.innerText = (data[u.nombre] && data[u.nombre][e]) ? data[u.nombre][e] : 0;
                 });
             });
         });
