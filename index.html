@@ -8,23 +8,22 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
-        
         :root {
             --bg: #947b59; --card: #1e293b; --text: #f8fafc;
             --sumar: #22c55e; --restar: #ef4444; --accent: #38bdf8;
             --avataroutline: #535059;
         }
         .nota-simple {
-    position: fixed; /* Esto la deja fija */
-    top: 500px;       /* Distancia desde arriba */
-    right: 7px;     /* Distancia desde la derecha */
-    transform: translateX(-50%);
-    font-family: "system-ui", "Comic Sans";
-    width: auto;
-    font-size: 1.3rem;
-    color: rgba(255,255,255,1); /* Color semi-transparente */
-    z-index: 1000;
-}
+            position: fixed;
+            top: 500px;
+            right: 7px;
+            transform: translateX(-50%);
+            font-family: "system-ui", "Comic Sans", cursive;
+            width: auto;
+            font-size: 1.3rem;
+            color: rgba(255,255,255,1);
+            z-index: 1000;
+        }
 
         body { 
             font-family: Quicksand, sans-serif; background-color: var(--bg); color: var(--text);
@@ -52,12 +51,11 @@
             display: flex; flex-direction: column; align-items: center;
         }
         
-        /* Estilo de la Foto de Perfil mejorado */
         .avatar {
             width: 60px; height: 60px; border-radius: 50%;
             background-color: #334155; margin-bottom: 8px;
             border: 2px solid var(--avataroutline);
-            object-fit: cover; /* Esto evita que la imagen de la rata se estire feo */
+            object-fit: cover;
             object-position: center;
         }
 
@@ -126,15 +124,15 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         
-        // --- CONFIGURACIÓN DE INTEGRANTES ---
         const configUsuarios = [
             { nombre: "MapachePan", foto: "pan.jpg" },
             { nombre: "I_Drive", foto: "drive.jpg" },
             { nombre: "TripleJMC", foto: "juan.jpg" },
-            { nombre: "jalapapeles", foto: "rata.jpg" } // <--- USANDO TU ARCHIVO
+            { nombre: "jalapapeles", foto: "rata.jpg" }
         ];
 
-        const emojis = ["💩", "🚿", "🥛"];
+        // CAMBIO DE ORDEN AQUÍ:
+        const emojis = ["💩", "🥛", "🚿"]; 
         let modoSumar = true;
         let tiemposPoop = {};
 
